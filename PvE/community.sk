@@ -1,0 +1,59 @@
+# Community Rewards and Features
+
+
+on skript load:
+    set {lastFirstJoin} to now
+    set {lastJoin} to now
+
+on first join:
+    set {lastFirstJoin} to now
+    set {playersWelcomed.%player%} to 0
+    set {playersWelcomedBack.%player%} to 0
+    
+on chat:
+    if difference between {lastFirstJoin} and now is less than 30 seconds:
+        if {lastFirstJoin} > {lastNewJoinReward.%player%}:
+            if message is "welcome":
+                execute console command "/eco give %player% 1"
+                send "&6[&9PCN&6] &7Thank you for supporting the community. Here's $1 for your kindness!" to player
+                set {lastNewJoinReward.%player%} to now
+                set {playersWelcomed.%player%} to 1 + {playersWelcomed.%player%} 
+            if message is "Welcome!":
+                execute console command "/eco give %player% 1"
+                send "&6[&9PCN&6] &7Thank you for supporting the community. Here's $1 for your kindness!" to player
+                set {lastNewJoinReward.%player%} to now
+                set {playersWelcomed.%player%} to 1 + {playersWelcomed.%player%} 
+            
+on join:
+    set {lastJoin} to now
+    set {lastJoinPlayer} to player
+    set {lastJoinReward.%player%} to now
+    set {lastNewJoinReward.%player%} to now
+
+on chat:
+    if difference between {lastJoin} and now is less than 30 seconds:
+        if {lastJoin} > {lastJoinReward.%player%}:
+            if player is not equal to {lastJoinPlayer}:
+                if message is "welcome back":
+                    execute console command "/eco give %player% 1"
+                    send "&6[&9PCN&6] &7Thank you for supporting the community. Here's $1 for your kindness!" to player
+                    set {lastJoinReward.%player%} to now
+                    set {lastJoinReward.%player%} to now
+                    set {playersWelcomedBack.%player%} to 1 + {playersWelcomedBack.%player%} 
+                else if message is "wb" or "Welcome back" or "Welcome back!":
+                    execute console command "/eco give %player% 1"
+                    send "&6[&9PCN&6] &7Thank you for supporting the community. Here's $1 for your kindness!" to player
+                    set {lastJoinReward.%player%} to now
+                    set {playersWelcomedBack.%player%} to 1 + {playersWelcomedBack.%player%} 
+            
+
+command /comtop <player>:
+    description: Get Player's Community Statistics
+    trigger:
+        send "Last Join: %{lastJoin}%" to the player
+        send "Last Joined Player: %{lastJoinPlayer}%" to the player
+        send "Last Join Reward: %{lastNewJoinReward.%arg 1%}%" to the player
+        send "Last New Join: %{lastFirstJoin}%" to the player
+        send "Last New Join Reward: %{lastJoinReward.%arg 1%}%" to the player
+        send "%arg 1% has welcomed %{playersWelcomed.arg 1}% people to the server" to the player
+        send "%arg 1% has welcomed %{playersWelcomed.arg 1}% new people to the server" to the player
