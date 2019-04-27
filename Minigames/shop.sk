@@ -1,6 +1,8 @@
+#-----------------------------------------------------------
 #
-#   Open the main shop window
+#	Open main shop window
 #
+#-----------------------------------------------------------
 function openMinigamesShop(p: player):
     #
     #   Create the items
@@ -17,41 +19,41 @@ function openMinigamesShop(p: player):
     set slot 2 of {_inventory} to {_trenchclasses}
     open {_inventory} to {_p}
 
-###############################################
+#-----------------------------------------------------------
 #
 #   Open the Cosmetic shop
 #
-###############################################
+#-----------------------------------------------------------
 function openCosmeticShop(p: player):
     close {_p}'s inventory
     set {_inventory} to chest inventory with 1 row named "&5[&dCosmetic Shop&5]"
     open {_inventory} to {_p}
 
-###############################################
+#-----------------------------------------------------------
 #
 #   Open the Mob Arenas Classes shop
 #
-###############################################
+#-----------------------------------------------------------
 function openMobArenaShop(p: player):
     close {_p}'s inventory
     set {_inventory} to chest inventory with 1 row named "&2[&aMob Arenas Classes&5]"
     open {_inventory} to {_p}
 
-###############################################
+#-----------------------------------------------------------
 #
 #   Open the Trench Classes shop
 #
-###############################################
+#-----------------------------------------------------------
 function openTrenchShop(p: player):
     close {_p}'s inventory
     set {_inventory} to chest inventory with 1 row named "&4[&cTrench Classes&5]"
     open {_inventory} to {_p}
 
-###############################################
+#-----------------------------------------------------------
 #
 #   Command to open the shop
 #
-###############################################
+#-----------------------------------------------------------
 command /buy:
     permission: pcn.minigames.shop
     description: Open the Minigames shop.
@@ -59,11 +61,11 @@ command /buy:
     trigger:
         openMinigamesShop(player)
 
-###############################################
+#-----------------------------------------------------------
 #
 #   Listen for clicks of shop items
 #
-###############################################
+#-----------------------------------------------------------
 on inventory click:
     if clicked inventory's name is "&2[&9Minigames Shop&2]":
         #
@@ -82,11 +84,11 @@ on inventory click:
         if item is iron chestplate:
             openTrenchShop(player)
 
-################################################           
+#-----------------------------------------------------------        
 #
 #   Make sure we can't take things out of the inventories
 #
-################################################
+#-----------------------------------------------------------
 on inventory click:
     if clicked inventory's name is "&2[&9Minigames Shop&2]":
         cancel the event
