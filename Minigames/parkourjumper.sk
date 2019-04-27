@@ -1,0 +1,119 @@
+#-----------------------------------------------------------
+#
+#	Warp %{_p}% to their checkpoint, or the start if they don't have one
+#
+#-----------------------------------------------------------
+function resumeParkour(p: player, pk: string):
+	if {%{_p}%.pk.%{_pk}%.checkpoint} is set:
+		execute console command "warp pk_%{_pk}%_%{%{_p}%.pk.%{_pk}%.checkpoint}% %{_p}%"
+		send "&9[&2PCN&9]&aResuming from checkpoint %{%{_p}%.pk.%{_pk}%.checkpoint}%. Good luck!" to {_p}
+	else:
+		execute console command "warp pk_%{_pk}% %{_p}%"
+		send "&9[&2PCN&9]&aNo saved checkpoints found. Good luck!" to {_p}
+
+#-----------------------------------------------------------
+#
+#	Mark completion and teleport user out
+#
+#-----------------------------------------------------------
+function finishParkour(p: player, pk: string, r: int):
+	execute console command "warp pk_return %{_p}%"
+	send "&9[&2PCN&9]&aCongratulations! You've completed the %{_pk}% parkour." to {_p}
+	clear {%{_p}%.pk.%{_pk}%.checkpoint}
+	add 1 to {%{_p}%.pk.%{_pk}%}
+	if {%{_p}%.pk.%{_pk}%} is 1:
+		execute console command "eco give %{_p}% %{_reward}%"
+	else:
+		send "&aYou can only earn a puzzle award once though so good effort, but no money this time." to {_p}
+
+#-----------------------------------------------------------
+#
+#	Save a new checkpoint from sign click
+#
+#-----------------------------------------------------------
+function saveCheckpoint(p: player, pk: string, point: string):
+	set {%{_p}%.pk.%{_pk}%.checkpoint} to {_point}
+	send "&9[&2PCN&9]&aCheckpoint %{_point}% saved for %{_pk}% parkour" to {_p}
+	
+#-----------------------------------------------------------
+#
+#	Sign click listeners
+#
+#-----------------------------------------------------------
+on click:
+	clicked block is a sign:
+		if line 1 is "&9[&2Parkour&9]":
+			if line 2 is "&9[&aFinish&9]":
+				if line 3 is "Rainbow":
+					finishParkour(player, "Rainbow", 80)
+				if line 3 is "":
+					finishParkour(player, "", 0)
+			if line 2 is "&9[&aResume&9]":
+				resumeParkour(player, line 3)
+			if line 2 is "&9[&aSave&9]":
+				saveCheckpoint(player, line 3, line 4)
+				
+#-----------------------------------------------------------
+#
+#	Convert number of completions to fancy colored string
+#
+#-----------------------------------------------------------
+function formatParkourCompletedness(comp: int) :: string:
+	if {_comp} is not set:
+		return "&cNot Completed"
+	if {_comp} is 0:
+		return "&cNot Completed"
+	if {_comp} is 1:
+		return "&aComplete"
+	if {_comp} is greater than 1:
+		return "&aCompleted %{_comp}% times."
+
+#-----------------------------------------------------------
+#
+#	Format & send output for /mz and /mzof
+#
+#-----------------------------------------------------------
+function sendParkourList(p: player, r: player):
+	send "&9&l########################################################################" to {_r}
+	send "&1[&2Rainbow&1]: %formatMazeCompletedness({%{_p}%.pk.Rainbow})%" to {_r}
+	send "&1[&2Spawn&1]: %formatMazeCompletedness({%{_p}%.pk.Spawn})%" to {_r}
+	send "&9&l########################################################################" to {_r}
+
+#-----------------------------------------------------------
+#
+#	View mazes you've completed
+#
+#-----------------------------------------------------------
+command /pk:
+	aliases: /parkour
+	description: See what parkours you've completed
+	usage: /parkour
+	trigger:
+		sendParkourList(player, player)
+
+#-----------------------------------------------------------
+#
+#	View mazes <offlineplayer> has completed
+#
+#-----------------------------------------------------------
+command /pkof <offlineplayer>:
+	aliases: /pkok
+	description: See what parkours other player's have completed
+	usage: /pk <player>
+	trigger:
+		sendParkourList(arg 1, player)
+
+#-----------------------------------------------------------
+#
+#	Reset <offlineplayers>'s maze counter
+#
+#-----------------------------------------------------------
+command /parkourreset <offlineplayer>:
+	aliases: /pkreset
+	description: Reset a player's parkour statistics
+	usage: /pkreset <player>
+	permission: pcn.minigames.staff.pkreset
+	trigger:
+		set {%arg 1%.pk.Rainbow} to 0
+		set {%arg 1%.pk.Spawn} to 0
+		send "&9[&2PCN&9] %arg-1%'s parkour counters have been reset to 0."
