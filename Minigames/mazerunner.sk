@@ -1,0 +1,118 @@
+function finishMaze(p: player, maze: string, reward: int):
+	execute console command "warp mz_return %{_p}%"
+	send "&9[&2PCN&9]&aCongratulations! You've completed the %{_maze}% maze." to {_p}
+	if {_reward} is greater than 0:
+		execute console command "eco give %{_p}% %{_reward}%"
+	else:
+		send "&aYou can only earn a puzzle award once though so good effort, but no money this time." to {_p}
+
+#-----------------------------------------------------------
+#
+#	Sign click listener
+#
+#-----------------------------------------------------------
+on click:
+	clicked block is a sign:
+		if line 1 is "&9[&2Maze&9]":
+			if line 2 is "&9[&aFinish&9]":
+				if line 3 is "Hedge":
+					add 1 to {%player%.mz.hedge}
+					if {%player%.mz.hedge} is 1:
+						finishMaze(player, "Hedge", 20)
+					else:
+						finishMaze(player, "Hedge", 0)
+				if line 3 is "Labyrinth":
+					add 1 to {%player%.mz.labyrinth}
+					if {%player%.mz.labyrinth} is 1:
+						finishMaze(player, "Labyrinth", 30)
+					else:
+						finishMaze(player, "Labyrinth", 0)
+				if line 3 is "Dungeon":
+					add 1 to {%player%.mz.dungeon}
+					if {%player%.mz.dungeon} is 1:
+						finishMaze(player, "Dungeon", 40)
+					else:
+						finishMaze(player, "Dungeon", 0)
+				if line 3 is "Catacombs":
+					add 1 to {%player%.mz.catacombs}
+					if {%player%.mz.catacombs} is 1:
+						finishMaze(player, "Catacombs", 50)
+					else:
+						finishMaze(player, "Catacombs", 0)
+			if line 2 is "&9[&aStart&9]":
+				if line 3 is "Hedge":
+					execute console command "warp mz_Hedge %player%"
+				if line 3 is "Labyrinth":
+					execute console command "warp mz_Labyrinth %player%"
+				if line 3 is "Dungeon":
+					execute console command "warp mz_Dungeon %player%"
+				if line 3 is "Catacombs":
+					execute console command "warp mz_Catacombs %player%"
+#-----------------------------------------------------------
+#
+#	Convert number of completions to fancy colored string
+#
+#-----------------------------------------------------------
+function formatMazeCompletedness(comp: int) :: string:
+	if {_comp} is not set:
+		return "&cNot Completed"
+	if {_comp} is 0:
+		return "&cNot Completed"
+	if {_comp} is 1:
+		return "&aComplete"
+	if {_comp} is greater than 1:
+		return "&aCompleted %{_comp}% times."
+
+#-----------------------------------------------------------
+#
+#	Format & send output for /mz and /mzof
+#
+#-----------------------------------------------------------
+function sendMazeList(p: player, r: player):
+	send "&9&l########################################################################" to {_r}
+	send "&1[&2Hedge&1]    : %formatMazeCompletedness({%{_p}%.mz.hedge})%" to {_r}
+	send "&1[&2Labyrinth&1]: %formatMazeCompletedness({%{_p}%.mz.labyrinth})%" to {_r}
+	send "&1[&2Dungeon&1]  : %formatMazeCompletedness({%{_p}%.mz.dungeon})%" to {_r}
+	send "&1[&2Catacombs&1]: %formatMazeCompletedness({%{_p}%.mz.catacombs})%" to {_r}
+	send "&9&l########################################################################" to {_r}
+
+#-----------------------------------------------------------
+#
+#	View mazes you've completed
+#
+#-----------------------------------------------------------
+command /mz:
+	aliases: /maze
+	description: See what mazes you've completed
+	usage: /maze
+	trigger:
+		sendMazeList(player, player)
+
+#-----------------------------------------------------------
+#
+#	View mazes <offlineplayer> has completed
+#
+#-----------------------------------------------------------
+command /mzof <offlineplayer>:
+	aliases: /mazeof
+	description: See what mazes other player's have completed
+	usage: /maze <player>
+	trigger:
+		sendMazeList(arg 1, player)
+
+#-----------------------------------------------------------
+#
+#	Reset <offlineplayers>'s maze counter
+#
+#-----------------------------------------------------------
+command /mzreset <offlineplayer>:
+	aliases: /mazereset
+	description: Reset a player's maze statistics
+	usage: /mzreset <player>
+	permission: pcn.minigames.staff.mzreset
+	trigger:
+		set {%arg 1%.mz.hedge} to 0
+		set {%arg 1%.mz.labyrinth} to 0
+		set {%arg 1%.mz.dungeon} to 0
+		set {%arg 1%.mz.catacombs} to 0
+		send "&9[&2PCN&9] %arg-1%'s maze counters have been reset to 0."
