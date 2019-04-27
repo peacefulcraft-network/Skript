@@ -1,3 +1,8 @@
+#-----------------------------------------------------------
+#
+#	Mark completion and teleport user out
+#
+#-----------------------------------------------------------
 function finishMaze(p: player, maze: string, reward: int):
 	execute console command "warp mz_return %{_p}%"
 	send "&9[&2PCN&9]&aCongratulations! You've completed the %{_maze}% maze." to {_p}
