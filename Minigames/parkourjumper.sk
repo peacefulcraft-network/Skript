@@ -46,13 +46,37 @@ on click:
 			if line 2 is "&9[&aFinish&9]":
 				if line 3 is "Rainbow":
 					finishParkour(player, "Rainbow", 80)
-				if line 3 is "":
-					finishParkour(player, "", 0)
+				if line 3 is "Spawnkour":
+					finishParkour(player, "Spawnkour", 80)
 			if line 2 is "&9[&aResume&9]":
 				resumeParkour(player, line 3)
 			if line 2 is "&9[&aSave&9]":
 				saveCheckpoint(player, line 3, line 4)
-				
+
+#-----------------------------------------------------------
+#
+#	Spawnkour - Mark player for teleport a respawn so they don't get annoyed
+#
+#-----------------------------------------------------------
+on death of player:
+	if player's world is "Minigames_New":
+		if player's x location is greater than -80:
+			if player's z location is greater than 5970:
+				if player's x location is less than 110:
+					if player's z location is less than 6060:
+						set {%player%.pk.respawnRedirect} to 1
+
+#-----------------------------------------------------------
+#
+#	Spawnkour - Teleport player to last checkpoint on respawn
+#
+#-----------------------------------------------------------
+on respawn:
+	if {%player%.pk.respawnRedirect} is 1:
+		wait 10 ticks
+		resumeParkour(player, "Spawnkour")
+		clear {%player%.pk.respawnRedirect}
+
 #-----------------------------------------------------------
 #
 #	Convert number of completions to fancy colored string
@@ -114,6 +138,6 @@ command /parkourreset <offlineplayer>:
 	usage: /pkreset <player>
 	permission: pcn.minigames.staff.pkreset
 	trigger:
-		set {%arg 1%.pk.Rainbow} to 0
-		set {%arg 1%.pk.Spawn} to 0
+		clear {%arg 1%.pk.Rainbow}
+		clear {%arg 1%.pk.Spawnkour}
 		send "&9[&2PCN&9] %arg-1%'s parkour counters have been reset to 0."
