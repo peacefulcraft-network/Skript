@@ -44,6 +44,12 @@ on click:
 						finishMaze(player, "Catacombs", 50)
 					else:
 						finishMaze(player, "Catacombs", 0)
+				if line 3 is "Fantasy":
+				    add 1 to {%player%.mz.fantasy}
+				    if {%player%.mz.fantasy} is 1:
+					finishMaze(player, "Fantasy", 30)
+				    else:
+					finishMaze(player, "Fantasy", 0)
 			if line 2 is "&9[&aStart&9]":
 				if line 3 is "Hedge":
 					execute console command "warp mz_Hedge %player%"
@@ -53,6 +59,8 @@ on click:
 					execute console command "warp mz_Dungeon %player%"
 				if line 3 is "Catacombs":
 					execute console command "warp mz_Catacombs %player%"
+				if line 3 is "Fantasy":
+				    execute console command "warp mz_Fantasy %player%"
 #-----------------------------------------------------------
 #
 #	Convert number of completions to fancy colored string
@@ -79,6 +87,7 @@ function sendMazeList(p: player, r: player):
 	send "&1[&2Labyrinth&1]: %formatMazeCompletedness({%{_p}%.mz.labyrinth})%" to {_r}
 	send "&1[&2Dungeon&1]  : %formatMazeCompletedness({%{_p}%.mz.dungeon})%" to {_r}
 	send "&1[&2Catacombs&1]: %formatMazeCompletedness({%{_p}%.mz.catacombs})%" to {_r}
+   	send "&1[&2Fatansy&1]: %formatMazeCompletedness({%{_p}%.mz.fantasy})%" to {_r}
 	send "&9&l########################################################################" to {_r}
 
 #-----------------------------------------------------------
@@ -120,4 +129,5 @@ command /mzreset <offlineplayer>:
 		set {%arg 1%.mz.labyrinth} to 0
 		set {%arg 1%.mz.dungeon} to 0
 		set {%arg 1%.mz.catacombs} to 0
+	        set {%arg 1%.mz.fantasy} to 0
 		send "&9[&2PCN&9] %arg-1%'s maze counters have been reset to 0."
