@@ -100,7 +100,7 @@ function formatParkourCompletedness(comp: int) :: string:
 function sendParkourList(p: player, r: player):
 	send "&9&l########################################################################" to {_r}
 	send "&1[&2Rainbow&1]: %formatMazeCompletedness({%{_p}%.pk.Rainbow})%" to {_r}
-	send "&1[&2Spawn&1]: %formatMazeCompletedness({%{_p}%.pk.Spawn})%" to {_r}
+	send "&1[&2Spawn&1]: %formatMazeCompletedness({%{_p}%.pk.Spawnkour})%" to {_r}
 	send "&9&l########################################################################" to {_r}
 
 #-----------------------------------------------------------
