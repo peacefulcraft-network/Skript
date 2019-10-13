@@ -1,4 +1,30 @@
+#Sk Mirror Imports
+import:
+    org.bukkit.inventory.ItemStack
+    org.bukkit.inventory.meta.ItemMeta
+    org.bukkit.Material
+    java.lang.Enum
+
+#------------------------------------------------------------
+#
+#	Generate string with PCN message Prefix
+#
 #-----------------------------------------------------------
+function generatePrefixedMessage(s: string) :: string:
+    return "&9[&2PCN&9] &a%{_s}%" 
+
+#------------------------------------------------------------
+#
+#	Check if user can afford something
+#
+#-----------------------------------------------------------
+function canAfford(d: Number, p: Player) :: boolean:
+    if balance of {_p} > {_d} - 1:
+        return true
+    else:
+        return false
+
+#------------------------------------------------------------
 #
 #	Open main shop window
 #
@@ -7,16 +33,30 @@ function openMinigamesShop(p: player):
     #
     #   Create the items
     #
-    set {_cosmetics} to firework rocket with lore "&5Cosmetics" and "&5(&dCool things to wow and mess with your friends&5)"
-    set {_maclasses} to chain chestplate with lore "&2Mob Arena Classes" and "&2(&aBuy classes and abilities for Mob Arena&2)"
-    set {_trenchclasses} to iron chestplate with lore "&4Trench Classes" and "&4(&cBuy classes and abilities for Trench&4)"
+    set {_cosmetics} to firework rocket with lore "&5(&dCool things to wow and mess with your friends&5)"
+    set name of {_cosmetics} to "&5Cosmetics"
+    set {_maclasses} to chain chestplate with lore "&2(&aBuy classes and abilities for Mob Arena&2)"
+    set name of {_maclasses} to "&2Mob Arena Classes"
+    set {_trenchclasses} to iron chestplate with lore "&4(&cBuy classes and abilities for Trench&4)"
+    set name of {_trenchclasses} to "&4Trench Classes"
+    #
+    #   Rankup Display, if user can rankup
+    #
+    set {_nextRank} to getPlayerNextRank({_p})
+    if {_nextRank} is "none":
+        set {_rankup} to Red Wool with lore "&1(&9Sorry, you've reached the highest rank we have right now&1)"
+        set name of {_rankup} to "&cNo Rankup Available"
+    else:
+        set {_rankup} to Name Tag with lore "&1(&9Rank up to %{_nextRank}%&1)"
+        set name of {_rankup} to {_nextRank}
     #
     #   Create the inventory menu and add the items
     #
     set {_inventory} to chest inventory with 1 row named "&2[&9Minigames Shop&2]"
-    set slot 0 of {_inventory} to {_cosmetics}
-    set slot 1 of {_inventory} to {_maclasses}
-    set slot 2 of {_inventory} to {_trenchclasses}
+    #set slot 0 of {_inventory} to {_cosmetics}
+    #set slot 1 of {_inventory} to {_maclasses}
+    #set slot 2 of {_inventory} to {_trenchclasses}
+    set slot 8 of {_inventory} to {_rankup}
     open {_inventory} to {_p}
 
 #-----------------------------------------------------------
@@ -47,14 +87,69 @@ function openMobArenaShop(p: player):
 function openTrenchShop(p: player):
     close {_p}'s inventory
     set {_inventory} to chest inventory with 1 row named "&4[&cTrench Classes&5]"
+    #
+    #   Define the items
+    #
+    set {_adjunkie} to type of glass bottle with lore "&5Perform dangerous, high-flying stunts to out maneuver your enemy"
+    set name of {_adjunkie} to "&fAdrenaline Junkie &2(&a$500&2)"
+    #set {_nthentity} to new ItemStack(Enum.valueOf(Material, "BLACK_BANNER")) with lore "&5Harness the man power of Minecraft mobs to fight your enemies."
+    #set name of {_nthentity} to "&fNth Entity"
+    #set {_elementalist} to dark oak sapling with lore "&5@Kage, what exactly does this one do again?"
+    #set name of {_elementalist} to "&fElementalist"
+    set {_pigking} to porkchop with lore "&5Harness the man power of Minecraft mobs to fight your enemies."
+    set name of {_pigking} to "&fPig King &2(&a$500&2)"
+    #set {_jordan} to turtle egg with lore "&5James, the hero we knew we didn't need, but are stuck with anyway."
+    #set name of {_jordan} to "&fJunior Community Manager"
+    #
+    #   Place the items in the menu
+    #
+    set slot 0 of {_inventory} to {_adjunkie}
+    set slot 2 of {_inventory} to {_pigking}
+    #set slot 4 of {_inventory} to {_nthentity}
+    #set slot 6 of {_inventory} to {_elementalist}
+    #set slot 8 of {_inventory} to {_jordan}
     open {_inventory} to {_p}
+
+#-----------------------------------------------------------
+#
+#   Permissions Interface Function
+#
+#-----------------------------------------------------------
+function playerPurchaseClass(p: Player, node: String, price: Number):
+    if {_p} has permission {_node}:
+        send generatePrefixedMessage("You've already purchased that class!") to {_p}
+    else:
+        if canAfford({_price}, {_p}) is true:
+            send generatePrefixedMessage("You've purchased the %{_node}% class!") to {_p}
+            remove {_price} from balance of {_p}
+            execute console command "lp user permission set %{_node}% true minigames"
+        else:
+            send generatePrefixedMessage("You can not afford that class! You are %{_price} - balance of {_p}% short") to {_p}
+
+#-----------------------------------------------------------
+#
+#   Permissions Rank Interface - Determine What Rank We Get Next
+#
+#-----------------------------------------------------------
+function getPlayerNextRank(p: Player) :: string:
+    add "default" to {_mgmRanks::*}
+    add "mgm_user" to {_mgmRanks::*}
+    add "mgm_player" to {_mgmRanks::*}
+    add "mgm_gamer" to {_mgmRanks::*}
+    add "mgm_master" to {_mgmRanks::*}
+    loop {_mgmRanks::*}:
+        if {_breakNext} is true:
+            return loop-value
+        if group of {_p} is "%loop-value%":
+            set {_breakNext} to true
+    return "none"
 
 #-----------------------------------------------------------
 #
 #   Command to open the shop
 #
 #-----------------------------------------------------------
-command /buy:
+command /shop:
     permission: pcn.minigames.shop
     description: Open the Minigames shop.
     usage: /shop
@@ -63,26 +158,68 @@ command /buy:
 
 #-----------------------------------------------------------
 #
-#   Listen for clicks of shop items
+#   Listen for clicks of shop section item
 #
 #-----------------------------------------------------------
-on inventory click:
-    if clicked inventory's name is "&2[&9Minigames Shop&2]":
+on inventory click:  
+    #
+    # Work around for new inventory view system until Skript updates
+    # Users skript-mirror plugin
+    set {_i} to event.getView()
+    set {_n} to {_i}.getTitle()
+    set {_s} to event.getCurrentItem().getType().toString()
+    # https://github.com/SkriptLang/Skript/issues/2069
+    #
+    if {_n} is "&2[&9Minigames Shop&2]":
         #
         #   Open Cosmetic Shop
         #
-        if item is firework rocket:
+        if {_s} is "FIREWORK_ROCKET":
             openCosmeticShop(player)
         #
         #   Open Mob Arena Classes
         #
-        if item is chain chestplate:
+        if {_s} is "CHAINMAIL_CHESTPLATE":
             openMobArenaShop(player)
         #
         #   Open Trench Classes
         #
-        if item is iron chestplate:
+        if {_s} is "IRON_CHESTPLATE":
             openTrenchShop(player)
+        #
+        #   Rank Up
+        #
+        if {_s} is "NAME_TAG":
+            if canAfford(500, player) is true:
+                send generatePrefixedMessage("You've purchased the %getPlayerNextRank(player)% rank!")
+                remove 500 from balance of player
+                execute console command "lp user %player% promote minigames"
+            else:
+                send generatePrefixedMessage("Sorry, you need $500 to rank up. You're $%500 - balance of player% short.")
+        if {_s} is "RED WOOL":
+            send generatePrefixedMessage("Sorry, there are no more classes for you to rank up to")
+
+#-----------------------------------------------------------
+#
+#   Listen for clicks of Trench shop class items
+#
+#-----------------------------------------------------------
+on inventory click:
+    set {_i} to event.getView()
+    set {_n} to {_i}.getTitle()
+    set {_s} to event.getCurrentItem().getType().toString()
+    if {_n} is "&4[&cTrench Classes&5]":
+        if {_s} is "GLASS_BOTTLE":
+            playerPurchaseClass(player, "trenchpvp.class.adrenaline_junky", 500)
+        if {_s} is "BLACK_BANNER":
+            playerPurchaseClass(player, "trenchpvp.class.nth_entity", 1000)
+        if {_s} is "DARK_OAK_SAPPLING":
+            playerPurchaseClass(player, "trenchpvp.class.elementalist", 1000)
+        if {_s} is "PORKCHOP":
+            playerPurchaseClass(player, "trenchpvp.class.ping_king", 500)
+        if {_s} is "TURTLEEGG":
+            playerPurchaseClass(player, "trenchpvp.class.james", 500)
+
 
 #-----------------------------------------------------------        
 #
@@ -90,11 +227,18 @@ on inventory click:
 #
 #-----------------------------------------------------------
 on inventory click:
-    if clicked inventory's name is "&2[&9Minigames Shop&2]":
+    #
+    # Work around for new inventory view system until Skript updates
+    # Users skript-mirror plugin
+    set {_i} to event.getView()
+    set {_n} to {_i}.getTitle()
+    # https://github.com/SkriptLang/Skript/issues/2069
+    #
+    if {_n} is "&2[&9Minigames Shop&2]":
         cancel the event
-    if clicked inventory's name is "&5[&dCosmetic Shop&5]":
+    if {_n} is "&5[&dCosmetic Shop&5]":
         cancel the event
-    if clicked inventory's name is "&2[&aMob Arenas Classes&5]":
+    if {_n} is "&2[&aMob Arenas Classes&5]":
         cancel the event
-    if clicked inventory's name is "&4[&cTrench Classes&5]":
+    if {_n} is "&4[&cTrench Classes&5]":
         cancel the event
