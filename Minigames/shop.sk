@@ -122,7 +122,7 @@ function playerPurchaseClass(p: Player, node: String, price: Number):
         if canAfford({_price}, {_p}) is true:
             send generatePrefixedMessage("You've purchased the %{_node}% class!") to {_p}
             remove {_price} from balance of {_p}
-            execute console command "lp user permission set %{_node}% true minigames"
+            execute console command "lp user %{_p}% permission set %{_node}% true trench"
         else:
             send generatePrefixedMessage("You can not afford that class! You are %{_price} - balance of {_p}% short") to {_p}
 
