@@ -216,7 +216,7 @@ on inventory click:
         if {_s} is "DARK_OAK_SAPPLING":
             playerPurchaseClass(player, "trenchpvp.class.elementalist", 1000)
         if {_s} is "PORKCHOP":
-            playerPurchaseClass(player, "trenchpvp.class.ping_king", 500)
+            playerPurchaseClass(player, "trenchpvp.class.pig_king", 500)
         if {_s} is "TURTLEEGG":
             playerPurchaseClass(player, "trenchpvp.class.james", 500)
 
