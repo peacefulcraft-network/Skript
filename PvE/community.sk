@@ -47,7 +47,7 @@ on chat:
                     set {playersWelcomedBack.%player%} to 1 + {playersWelcomedBack.%player%} 
             
 
-command /comtop <player>:
+command /comtop <offlineplayer>:
     description: Get Player's Community Statistics
     trigger:
         send "Last Join: %{lastJoin}%" to the player
@@ -55,5 +55,5 @@ command /comtop <player>:
         send "Last Join Reward: %{lastNewJoinReward.%arg 1%}%" to the player
         send "Last New Join: %{lastFirstJoin}%" to the player
         send "Last New Join Reward: %{lastJoinReward.%arg 1%}%" to the player
-        send "%arg 1% has welcomed %{playersWelcomed.arg 1}% people to the server" to the player
-        send "%arg 1% has welcomed %{playersWelcomed.arg 1}% new people to the server" to the player
+        send "%arg 1% has welcomed %{playersWelcomed.%arg 1%}% people to the server" to the player
+        send "%arg 1% has welcomed back %{playersWelcomedBack.%arg 1%}% people to the server" to the player
