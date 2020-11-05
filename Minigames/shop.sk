@@ -1,10 +1,3 @@
-#Sk Mirror Imports
-import:
-    org.bukkit.inventory.ItemStack
-    org.bukkit.inventory.meta.ItemMeta
-    org.bukkit.Material
-    java.lang.Enum
-
 #------------------------------------------------------------
 #
 #	Generate string with PCN message Prefix
@@ -55,7 +48,7 @@ function openMinigamesShop(p: player):
     set {_inventory} to chest inventory with 1 row named "&2[&9Minigames Shop&2]"
     #set slot 0 of {_inventory} to {_cosmetics}
     #set slot 1 of {_inventory} to {_maclasses}
-    #set slot 2 of {_inventory} to {_trenchclasses}
+    set slot 2 of {_inventory} to {_trenchclasses}
     set slot 8 of {_inventory} to {_rankup}
     open {_inventory} to {_p}
 
@@ -90,13 +83,13 @@ function openTrenchShop(p: player):
     #
     #   Define the items
     #
-    set {_adjunkie} to type of glass bottle with lore "&5Perform dangerous, high-flying stunts to out maneuver your enemy"
+    set {_adjunkie} to type of glass bottle with lore "&5Perform dangerous, high-flying stunts with your launch pad to out maneuver your enemies."
     set name of {_adjunkie} to "&fAdrenaline Junkie &2(&a$500&2)"
-    #set {_nthentity} to new ItemStack(Enum.valueOf(Material, "BLACK_BANNER")) with lore "&5Harness the man power of Minecraft mobs to fight your enemies."
+    #set {_nthentity} to new ItemStack(Enum.valueOf(Material, "BLACK_BANNER")) with lore "&5Harness the power of Minecraft mobs to fight your enemies."
     #set name of {_nthentity} to "&fNth Entity"
     #set {_elementalist} to dark oak sapling with lore "&5@Kage, what exactly does this one do again?"
     #set name of {_elementalist} to "&fElementalist"
-    set {_pigking} to porkchop with lore "&5Harness the man power of Minecraft mobs to fight your enemies."
+    set {_pigking} to porkchop with lore "&5Harness the power of explosive pigs to fight your enemies."
     set name of {_pigking} to "&fPig King &2(&a$500&2)"
     #set {_jordan} to turtle egg with lore "&5James, the hero we knew we didn't need, but are stuck with anyway."
     #set name of {_jordan} to "&fJunior Community Manager"
@@ -162,38 +155,33 @@ command /shop:
 #
 #-----------------------------------------------------------
 on inventory click:  
-    #
-    # Work around for new inventory view system until Skript updates
-    # Users skript-mirror plugin
-    set {_i} to event.getView()
-    set {_n} to {_i}.getTitle()
-    set {_s} to event.getCurrentItem().getType().toString()
-    # https://github.com/SkriptLang/Skript/issues/2069
-    #
+    set {_n} to the clicked inventory's name
+    set {_s} to event-item
+    send {_s} to player
     if {_n} is "&2[&9Minigames Shop&2]":
         #
         #   Open Cosmetic Shop
         #
-        if {_s} is "FIREWORK_ROCKET":
+        if {_s} is firework rocket:
             openCosmeticShop(player)
         #
         #   Open Mob Arena Classes
         #
-        if {_s} is "CHAINMAIL_CHESTPLATE":
+        if {_s} is chainmail chestplate:
             openMobArenaShop(player)
         #
         #   Open Trench Classes
         #
-        if {_s} is "IRON_CHESTPLATE":
+        if {_s} is iron chestplate:
             openTrenchShop(player)
         #
         #   Rank Up
         #
-        if {_s} is "NAME_TAG":
+        if {_s} is name tag:
             if canAfford(500, player) is true:
                 send generatePrefixedMessage("You've purchased the %getPlayerNextRank(player)% rank!")
                 remove 500 from balance of player
-                execute console command "lp user %player% promote minigames"
+                execute console command "lp user %player% promote minigames minigames"
             else:
                 send generatePrefixedMessage("Sorry, you need $500 to rank up. You're $%500 - balance of player% short.")
         if {_s} is "RED WOOL":
@@ -205,19 +193,18 @@ on inventory click:
 #
 #-----------------------------------------------------------
 on inventory click:
-    set {_i} to event.getView()
-    set {_n} to {_i}.getTitle()
-    set {_s} to event.getCurrentItem().getType().toString()
+    set {_n} to the clicked inventory's name
+    set {_s} to name of event-item
     if {_n} is "&4[&cTrench Classes&5]":
-        if {_s} is "GLASS_BOTTLE":
+        if {_s} is glass bottle:
             playerPurchaseClass(player, "trenchpvp.class.adrenaline_junky", 500)
-        if {_s} is "BLACK_BANNER":
+        if {_s} is black banner:
             playerPurchaseClass(player, "trenchpvp.class.nth_entity", 1000)
-        if {_s} is "DARK_OAK_SAPPLING":
+        if {_s} is dark oak sapling:
             playerPurchaseClass(player, "trenchpvp.class.elementalist", 1000)
-        if {_s} is "PORKCHOP":
+        if {_s} is porkchop:
             playerPurchaseClass(player, "trenchpvp.class.pig_king", 500)
-        if {_s} is "TURTLEEGG":
+        if {_s} is turtle egg:
             playerPurchaseClass(player, "trenchpvp.class.james", 500)
 
 
@@ -227,13 +214,7 @@ on inventory click:
 #
 #-----------------------------------------------------------
 on inventory click:
-    #
-    # Work around for new inventory view system until Skript updates
-    # Users skript-mirror plugin
-    set {_i} to event.getView()
-    set {_n} to {_i}.getTitle()
-    # https://github.com/SkriptLang/Skript/issues/2069
-    #
+    set {_n} to the clicked inventory's name
     if {_n} is "&2[&9Minigames Shop&2]":
         cancel the event
     if {_n} is "&5[&dCosmetic Shop&5]":
